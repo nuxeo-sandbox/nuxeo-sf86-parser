@@ -19,7 +19,10 @@
  */
 package org.nuxeo.sf86;
 
+import static org.junit.Assert.assertEquals;
+
 import java.io.File;
+import java.util.List;
 
 import javax.inject.Inject;
 
@@ -28,6 +31,7 @@ import org.junit.runner.RunWith;
 import org.nuxeo.common.utils.FileUtils;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
+import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.impl.blob.FileBlob;
 import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
@@ -63,6 +67,23 @@ public class TestSF86ParserOp {
         SF86Parser parser = new SF86Parser(zipFileBlob);
         Blob xml = parser.getXml(session);
         System.out.println("XML: " + xml);
+        
+        List<DocumentModel> docs = session.query("SELECT * FROM Document WHERE ecm:primaryType='Applicant'");
+        assertEquals("we should have only one Applicant", 1, docs.size());
+
+        DocumentModel doc = docs.get(0);
+
+        String result = (String) doc.getPropertyValue("applicant:SSN");
+        assertEquals("123106667", result);
+
+        List<DocumentModel> debug = session.query("SELECT * FROM Document");
+        for (DocumentModel docx : debug) {
+            System.out.println(
+                    "doc: " + docx + "; " + docx.getProperties("applicant") + "; " + docx.getProperties("interview"));
+        }
+
+        List<DocumentModel> interviews = session.query("SELECT * FROM Document WHERE ecm:primaryType='Interview'");
+        assertEquals("we should have three Interviews", 3, interviews.size());
     }
 
 }

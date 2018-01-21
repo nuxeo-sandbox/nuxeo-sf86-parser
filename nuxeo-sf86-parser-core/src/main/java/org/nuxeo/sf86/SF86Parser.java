@@ -28,6 +28,8 @@ import java.nio.file.Paths;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.nuxeo.common.Environment;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
@@ -42,6 +44,8 @@ import org.nuxeo.runtime.api.Framework;
  * @since 9.10
  */
 public class SF86Parser {
+    
+    static final Log log = LogFactory.getLog(SF86Parser.class.getName());
 
     private Blob blob;
     private Path outDirPath;
@@ -55,8 +59,9 @@ public class SF86Parser {
         try {
             outDirPath = tmpDirPath != null ? Files.createTempDirectory(tmpDirPath, "sf86")
                     : Framework.createTempDirectory(null);
+            log.info("Created SF86 temp dir: " + outDirPath);
         } catch (IOException ex) {
-            ex.printStackTrace();
+            log.error("Problem creating temp dir", ex);
         }
     }
 
@@ -68,6 +73,7 @@ public class SF86Parser {
         sf86 = unzip(this.blob);
 
         // Parse the contents
+        log.info("Parsing SF86 XML: " + sf86);
         parseSF86(session, sf86);
 
         // Return that.
@@ -83,8 +89,7 @@ public class SF86Parser {
         try {
             importer.importDocuments(root, xml);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            log.error("Problem importing documents", e);
         }
 
         session.save();
@@ -139,6 +144,7 @@ public class SF86Parser {
                 }
 
                 File newFile = new File(outDirPath.toString() + File.separator + fileName);
+                log.info("Extracted SF86 file: " + newFile);
                 FileOutputStream fos = new FileOutputStream(newFile);
 
                 // Need to return the sf86 XML file.
@@ -158,7 +164,7 @@ public class SF86Parser {
             zis.close();
 
         } catch (IOException ex) {
-            ex.printStackTrace();
+            log.error("Problem extractibng documents", ex);
         }
         return result;
     }

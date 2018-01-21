@@ -19,6 +19,8 @@
 
 package org.nuxeo.sf86;
 
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.nuxeo.ecm.automation.core.Constants;
 import org.nuxeo.ecm.automation.core.annotations.Context;
 import org.nuxeo.ecm.automation.core.annotations.Operation;
@@ -37,6 +39,8 @@ import org.nuxeo.ecm.core.api.CoreSession;
 public class SF86ParserOp {
 
     public static final String ID = "SF86.Parser";
+
+    static final Log log = LogFactory.getLog(SF86ParserOp.class.getName());
 
     @Context
     protected CoreSession session;
