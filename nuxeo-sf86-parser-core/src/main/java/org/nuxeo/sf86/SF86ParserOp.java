@@ -47,7 +47,9 @@ public class SF86ParserOp {
 
     @OperationMethod
     public Blob run(Blob inBlob) {
+        log.info("Received blob: " + inBlob.getFilename());
         SF86Parser parser = new SF86Parser(inBlob);
-        return parser.getXml(session);
+        Blob xml = parser.getXml(session);
+        return xml;
     }
 }

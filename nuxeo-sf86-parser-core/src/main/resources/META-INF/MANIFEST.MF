@@ -5,6 +5,6 @@ Bundle-Vendor: org.nuxeo.sf86
 Bundle-Version: 1.0.0
 Bundle-Name: nuxeo-sf86-parser-core
 Bundle-ManifestVersion: 2
-Bundle-SymbolicName: org.nuxeo.sf86.nuxeo-sf86-parser-core;singleton=true
+Bundle-SymbolicName: nuxeo-sf86-parser;singleton=true
 Nuxeo-Component: OSGI-INF/sf86-parser-contrib.xml
 
