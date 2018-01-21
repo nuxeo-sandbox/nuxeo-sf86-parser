@@ -1,0 +1,64 @@
+<component
+	name="org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent.sf86.contrib"
+	version="1.0">
+	<require>org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent</require>
+	<extension
+		target="org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent"
+		point="documentMapping">
+		<docConfig tagName="//XMP/Request/Applicant">
+			<docType>Applicant</docType>
+			<!--<name> <![CDATA[ #{}]]></name> perhaps use sequence here -->
+			<parent>/default-domain/Applicants</parent>
+			<postCreationAutomationChain>Post_SF86Import</postCreationAutomationChain>
+		</docConfig>
+		<docConfig tagName="//XMP/Request/Attachments/Attachment">
+			<docType>File</docType>
+			<name>@OriginalLocalFileName</name>
+			<parent>..</parent>
+		</docConfig>
+		<docConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference">
+			<docType>Interview</docType>
+			<!-- Will use default naming convention -->
+			<parent>..</parent>
+		</docConfig>
+	</extension>
+	<extension
+		target="org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent"
+		point="attributeMapping">
+		<!-- Applicant Document -->
+		<attributeConfig tagName="//XMP/Request/Applicant/SSN"
+			docProperty="applicant:SSN" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/Request/Applicant/DemographicData/FullName/LegalName/Last"
+			docProperty="applicant:lastName" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/Request/Applicant/DemographicData/FullName/LegalName/First"
+			docProperty="applicant:firstName" xmlPath="text()" />
+		<!-- Applicant Attachments -->
+		<attributeConfig tagName="//XMP/Request/Attachments/Attachment"
+			docProperty="file:content">
+			<mapping documentProperty="filename">@OriginalLocalFileName</mapping>
+			<mapping documentProperty="content">@FileNameWhenExported</mapping>
+		</attributeConfig>
+		<!-- Interview Document -->
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference/LegalName/Last"
+			docProperty="interview:lastName" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference/LegalName/First"
+			docProperty="interview:firstName" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference/Address/ZipCode"
+			docProperty="interview:zipcode" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference/Telephone/Home/Number"
+			docProperty="interview:phone" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference/Telephone/Mobile/Number"
+			docProperty="interview:phone" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference/Email"
+			docProperty="interview:email" xmlPath="text()" />
+	</extension>
+</component>
