@@ -29,7 +29,7 @@
     <appender-ref ref="FILE"/>
   </category>
   
-  <category name="org.nuxeo.ecm.platform.importer.xml.parser">
+  <category name="org.nuxeo.ecm.platform.importer.xml.parser" additivity="false">
     <priority value="TRACE"/>
     <appender-ref ref="CONSOLE"/>
   </category>

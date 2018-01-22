@@ -16,7 +16,7 @@
                 .query(String.format("select * from Document where ecm:primaryType = 'Case' and case:SSN = '%s'", node.getText()));
             return dml.get(0).getPathAsString();
     }]]></parent>
-			<!--<postCreationAutomationChain>Post_SF86Import</postCreationAutomationChain>-->
+			<!--<postCreationAutomationChain>Post_SF86Import</postCreationAutomationChain> -->
 		</docConfig>
 		<!-- Attach associated documents -->
 		<docConfig tagName="//XMP/Request/Attachments/Attachment">
@@ -61,15 +61,17 @@
 		<attributeConfig tagName="//XMP/Request/Applicant"
 			docProperty="uid:uid" xmlPath="@UserId" />
 		<attributeConfig tagName="//XMP/Request/Applicant/SSN"
-			docProperty="application:SSN" xmlPath="text()" /> 
-			<!-- 
-		<attributeConfig
-			tagName="//XMP/Request/Applicant/DemographicData/FullName/LegalName/Last"
-			docProperty="application:lastName" xmlPath="text()" />
-		<attributeConfig
-			tagName="//XMP/Request/Applicant/DemographicData/FullName/LegalName/First"
-			docProperty="application:firstName" xmlPath="text()" />
-			-->
+			docProperty="application:SSN" xmlPath="text()" />
+		<attributeConfig tagName="//XMP/Request/Applicant/Name"
+			docProperty="dc:title" xmlPath="#{return source.getName();}" />
+		<attributeConfig tagName="//XMP/Request/Applicant/Name"
+			docProperty="file:content">
+			<mapping documentProperty="filename">#{return source.getName();}</mapping>
+			<mapping documentProperty="content">#{return source.getName();}</mapping>
+		</attributeConfig>
+		<!-- <attributeConfig tagName="//XMP/Request/Applicant/DemographicData/FullName/LegalName/Last" 
+			docProperty="application:lastName" xmlPath="text()" /> <attributeConfig tagName="//XMP/Request/Applicant/DemographicData/FullName/LegalName/First" 
+			docProperty="application:firstName" xmlPath="text()" /> -->
 		<!-- Applicant Attachments -->
 		<attributeConfig tagName="//XMP/Request/Attachments/Attachment"
 			docProperty="dc:title" xmlPath="@OriginalLocalFileName" />

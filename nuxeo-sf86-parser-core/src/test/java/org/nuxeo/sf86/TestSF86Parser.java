@@ -31,9 +31,12 @@ import javax.inject.Inject;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.nuxeo.common.utils.FileUtils;
+import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
 import org.nuxeo.ecm.core.api.DocumentModelList;
+import org.nuxeo.ecm.core.api.NuxeoException;
+import org.nuxeo.ecm.core.api.blobholder.BlobHolder;
 import org.nuxeo.ecm.core.test.CoreFeature;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
@@ -106,6 +109,8 @@ public class TestSF86Parser {
 
         String result = (String) doc.getPropertyValue("application:SSN");
         assertEquals(SSN, result);
+        Blob blob = getBlob(doc);
+        assertNotNull("we should have a blob attached to the application", blob);
 
         List<DocumentModel> debug = session.query("SELECT * FROM Document");
         for (DocumentModel docx : debug) {
@@ -116,6 +121,15 @@ public class TestSF86Parser {
 
         List<DocumentModel> interviews = session.query("SELECT * FROM Document WHERE ecm:primaryType='Interview'");
         assertEquals("we should have four Interviews", 4, interviews.size());
+    }
+
+    protected static Blob getBlob(DocumentModel doc) throws NuxeoException {
+        BlobHolder blobHolder = doc.getAdapter(BlobHolder.class);
+        if (blobHolder == null) {
+            return null;
+        }
+        return blobHolder.getBlob();
+
     }
 
 }
