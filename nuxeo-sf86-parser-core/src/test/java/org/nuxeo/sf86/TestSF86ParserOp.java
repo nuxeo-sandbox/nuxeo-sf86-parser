@@ -22,6 +22,7 @@ package org.nuxeo.sf86;
 import static org.junit.Assert.assertEquals;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -36,6 +37,7 @@ import org.nuxeo.ecm.automation.OperationContext;
 import org.nuxeo.ecm.core.api.Blob;
 import org.nuxeo.ecm.core.api.CoreSession;
 import org.nuxeo.ecm.core.api.DocumentModel;
+import org.nuxeo.ecm.core.api.DocumentModelList;
 import org.nuxeo.ecm.core.api.impl.blob.FileBlob;
 import org.nuxeo.ecm.core.test.annotations.Granularity;
 import org.nuxeo.ecm.core.test.annotations.RepositoryConfig;
@@ -68,8 +70,32 @@ public class TestSF86ParserOp {
     @Inject
     private AutomationService service;
 
+    private static final String SSN = "123106667";
+
     @Test
     public void testSF86Zip() throws Exception {
+
+        DocumentModel domain = session.createDocumentModel("Domain");
+        domain.setPathInfo("/", "default-domain");
+        session.createDocument(domain);
+
+        DocumentModel icontainer = session.createDocumentModel("CaseContainer");
+        icontainer.setPathInfo("/default-domain", "Investigations");
+        session.createDocument(icontainer);
+
+        DocumentModel investigation = session.createDocumentModel("Case");
+        investigation.setPathInfo("/default-domain/Investigations", "INV-00001");
+        investigation.setPropertyValue("case:SSN", SSN);
+        session.createDocument(investigation);
+        session.save();
+
+        DocumentModelList dml = session
+                .query(String.format("select * from Document where ecm:primaryType = 'Case' and case:SSN = '%s'", SSN));
+        assertEquals(1, dml.size());
+        for (DocumentModel dm : dml) {
+            assertEquals(SSN, dm.getPropertyValue("case:SSN"));
+        }
+
         File zipFile = FileUtils.getResourceFileFromContext("sf86/sf86.zip");
         Blob zipFileBlob = new FileBlob(zipFile);
 
@@ -82,22 +108,23 @@ public class TestSF86ParserOp {
 
         System.out.println("XML: " + xml);
 
-        List<DocumentModel> docs = session.query("SELECT * FROM Document WHERE ecm:primaryType='Applicant'");
-        assertEquals("we should have only one Applicant", 1, docs.size());
+        List<DocumentModel> docs = session.query("SELECT * FROM Document WHERE ecm:primaryType='Application'");
+        assertEquals("we should have only one Application", 1, docs.size());
 
         DocumentModel doc = docs.get(0);
 
-        String result = (String) doc.getPropertyValue("applicant:SSN");
-        assertEquals("123106667", result);
+        String result = (String) doc.getPropertyValue("application:SSN");
+        assertEquals(SSN, result);
 
         List<DocumentModel> debug = session.query("SELECT * FROM Document");
         for (DocumentModel docx : debug) {
-            System.out.println(
-                    "doc: " + docx + "; " + docx.getProperties("applicant") + "; " + docx.getProperties("interview"));
+            System.out.print("doc: " + docx);
+            Arrays.asList(docx.getSchemas()).stream().forEach(s -> System.out.print("; " + docx.getProperties(s)));
+            System.out.println();
         }
 
         List<DocumentModel> interviews = session.query("SELECT * FROM Document WHERE ecm:primaryType='Interview'");
-        assertEquals("we should have three Interviews", 3, interviews.size());
+        assertEquals("we should have four Interviews", 4, interviews.size());
     }
 
 }

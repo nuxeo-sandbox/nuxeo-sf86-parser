@@ -1,41 +1,80 @@
 <component
 	name="org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent.sf86.contrib"
 	version="1.0">
-	<require>org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent</require>
+	<require>org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent
+	</require>
 	<extension
 		target="org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent"
 		point="documentMapping">
+		<!-- Create Application based on SF86 contents -->
 		<docConfig tagName="//XMP/Request/Applicant">
-			<docType>Applicant</docType>
+			<docType>Application</docType>
 			<!--<name> <![CDATA[ #{}]]></name> perhaps use sequence here -->
-			<parent>/default-domain/Applicants</parent>
-			<postCreationAutomationChain>Post_SF86Import</postCreationAutomationChain>
+			<parent><![CDATA[ #{
+			org.dom4j.Node node = xml.selectSingleNode('//XMP/Request/Applicant/SSN');
+			org.nuxeo.ecm.core.api.DocumentModelList dml = session
+                .query(String.format("select * from Document where ecm:primaryType = 'Case' and case:SSN = '%s'", node.getText()));
+            return dml.get(0).getPathAsString();
+    }]]></parent>
+			<!--<postCreationAutomationChain>Post_SF86Import</postCreationAutomationChain>-->
 		</docConfig>
+		<!-- Attach associated documents -->
 		<docConfig tagName="//XMP/Request/Attachments/Attachment">
 			<docType>File</docType>
 			<name>@OriginalLocalFileName</name>
-			<parent>..</parent>
+			<parent><![CDATA[ #{
+			org.dom4j.Node node = xml.selectSingleNode('//XMP/Request/Applicant/SSN');
+			org.nuxeo.ecm.core.api.DocumentModelList dml = session
+                .query(String.format("select * from Document where ecm:primaryType = 'Case' and case:SSN = '%s'", node.getText()));
+            return dml.get(0).getPathAsString();
+    }]]></parent>
 		</docConfig>
+		<!-- Create interviews for personal references -->
 		<docConfig
 			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference">
 			<docType>Interview</docType>
 			<!-- Will use default naming convention -->
-			<parent>..</parent>
+			<parent><![CDATA[ #{
+			org.dom4j.Node node = xml.selectSingleNode('//XMP/Request/Applicant/SSN');
+			org.nuxeo.ecm.core.api.DocumentModelList dml = session
+                .query(String.format("select * from Document where ecm:primaryType = 'Case' and case:SSN = '%s'", node.getText()));
+            return dml.get(0).getPathAsString();
+    }]]></parent>
+		</docConfig>
+		<!-- Create interview for current residency location -->
+		<docConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']">
+			<docType>Interview</docType>
+			<!-- Will use default naming convention -->
+			<parent><![CDATA[ #{
+			org.dom4j.Node node = xml.selectSingleNode('//XMP/Request/Applicant/SSN');
+			org.nuxeo.ecm.core.api.DocumentModelList dml = session
+                .query(String.format("select * from Document where ecm:primaryType = 'Case' and case:SSN = '%s'", node.getText()));
+            return dml.get(0).getPathAsString();
+    }]]></parent>
 		</docConfig>
 	</extension>
 	<extension
 		target="org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent"
 		point="attributeMapping">
-		<!-- Applicant Document -->
+		<!-- Application Document -->
+		<attributeConfig tagName="//XMP/Request/Applicant"
+			docProperty="uid:uid" xmlPath="@UserId" />
 		<attributeConfig tagName="//XMP/Request/Applicant/SSN"
-			docProperty="applicant:SSN" xmlPath="text()" />
+			docProperty="application:SSN" xmlPath="text()" /> 
+			<!-- 
 		<attributeConfig
 			tagName="//XMP/Request/Applicant/DemographicData/FullName/LegalName/Last"
-			docProperty="applicant:lastName" xmlPath="text()" />
+			docProperty="application:lastName" xmlPath="text()" />
 		<attributeConfig
 			tagName="//XMP/Request/Applicant/DemographicData/FullName/LegalName/First"
-			docProperty="applicant:firstName" xmlPath="text()" />
+			docProperty="application:firstName" xmlPath="text()" />
+			-->
 		<!-- Applicant Attachments -->
+		<attributeConfig tagName="//XMP/Request/Attachments/Attachment"
+			docProperty="dc:title" xmlPath="@OriginalLocalFileName" />
+		<attributeConfig tagName="//XMP/Request/Attachments/Attachment"
+			docProperty="caat:typeOfAttachment" xmlPath="@DocumentType" />
 		<attributeConfig tagName="//XMP/Request/Attachments/Attachment"
 			docProperty="file:content">
 			<mapping documentProperty="filename">@OriginalLocalFileName</mapping>
@@ -59,6 +98,28 @@
 			docProperty="interview:phone" xmlPath="text()" />
 		<attributeConfig
 			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference/Email"
+			docProperty="interview:email" xmlPath="text()" />
+		<!-- Applicant Interview (current location) -->
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']/Verifier/LegalName/Last"
+			docProperty="interview:lastName" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']/Verifier/LegalName/First"
+			docProperty="interview:firstName" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']/Verifier/Address/ZipCode"
+			docProperty="interview:zipcode" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']/Verifier/Telephone/Day/Number"
+			docProperty="interview:phone" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']/Verifier/Telephone/Evening/Number"
+			docProperty="interview:phone" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']/Verifier/Telephone/Mobile/Number"
+			docProperty="interview:phone" xmlPath="text()" />
+		<attributeConfig
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']/Verifier/Email"
 			docProperty="interview:email" xmlPath="text()" />
 	</extension>
 </component>

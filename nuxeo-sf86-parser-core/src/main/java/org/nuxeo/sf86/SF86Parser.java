@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -44,7 +45,7 @@ import org.nuxeo.runtime.api.Framework;
  * @since 9.10
  */
 public class SF86Parser {
-    
+
     static final Log log = LogFactory.getLog(SF86Parser.class.getName());
 
     private Blob blob;
@@ -86,8 +87,14 @@ public class SF86Parser {
         DocumentModel root = session.getRootDocument();
 
         XMLImporterService importer = Framework.getService(XMLImporterService.class);
+        log.info("XML importer service: " + importer);
         try {
-            importer.importDocuments(root, xml);
+            List<DocumentModel> models = importer.importDocuments(root, xml);
+            if (log.isDebugEnabled()) {
+                for (DocumentModel mdl : models) {
+                    log.debug("Imported: " + mdl);
+                }
+            }
         } catch (IOException e) {
             log.error("Problem importing documents", e);
         }
@@ -164,7 +171,7 @@ public class SF86Parser {
             zis.close();
 
         } catch (IOException ex) {
-            log.error("Problem extractibng documents", ex);
+            log.error("Problem extracting documents", ex);
         }
         return result;
     }
