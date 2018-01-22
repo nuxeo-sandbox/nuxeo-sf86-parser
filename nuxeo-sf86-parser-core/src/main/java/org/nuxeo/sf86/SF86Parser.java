@@ -92,13 +92,13 @@ public class SF86Parser {
             List<DocumentModel> models = importer.importDocuments(root, xml);
             for (DocumentModel mdl : models) {
                 // Update application pointer
-                if ("Application" == mdl.getType()) {
+                if ("Application".equals(mdl.getType())) {
+                    log.info("Setting Application on Case: " + mdl + "; parent=" + mdl.getParentRef());
                     DocumentModel casedoc = session.getDocument(mdl.getParentRef());
                     casedoc.setPropertyValue("case:application", mdl.getRepositoryName() + ":" + mdl.getId());
                     session.saveDocument(casedoc);
-                }
-                if (log.isDebugEnabled()) {
-                    log.debug("Imported: " + mdl);
+                    log.info("Set case:application to: " + mdl.getRepositoryName() + ":" + mdl.getId());
+                    break;
                 }
             }
         } catch (IOException e) {
