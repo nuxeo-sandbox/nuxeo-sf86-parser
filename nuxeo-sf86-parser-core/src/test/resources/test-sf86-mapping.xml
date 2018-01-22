@@ -94,23 +94,34 @@
 			docProperty="pinfo:sex" xmlPath="text()" />
 		<attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation/Birth/Date"
 			docProperty="pinfo:dateOfBirth" xmlPath="#{
-			     String date = currentElement.selectSingleNode('Year').getText() + '-'
-			                 + currentElement.selectSingleNode('Month').getText() + '-'
-			                 + currentElement.selectSingleNode('Day').getText();
+			     org.dom4j.Node year = currentElement.selectSingleNode('Year');
+			     org.dom4j.Node mon = currentElement.selectSingleNode('Month');
+			     org.dom4j.Node day = currentElement.selectSingleNode('Day');
+			     if (year == null || mon == null || day == null) {
+			         return null;
+			     }
+			     String date = year.getText() + '-' + mon.getText() + '-' + day.getText();
 			     return Fn.parseDate(date, 'yyyy-MM-dd');
 			}" />
 		<attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation/Birth/Place"
 			docProperty="pinfo:placeOfBirth" xmlPath="#{ 
-			return currentElement.selectSingleNode('City').getText() + ', '
-			     + currentElement.selectSingleNode('County').getText() + ', '
-			     + currentElement.selectSingleNode('State').getText() + ', '
-			     + currentElement.selectSingleNode('Country').getText();
+			     org.dom4j.Node city = currentElement.selectSingleNode('City');
+			     org.dom4j.Node county = currentElement.selectSingleNode('County');
+			     org.dom4j.Node state = currentElement.selectSingleNode('State');
+			     org.dom4j.Node country = currentElement.selectSingleNode('Country');
+			return city != null ? (city.getText() + ', ') : ''
+			     + county != null ? (county.getText() + ', ') : ''
+			     + state != null ? (state.getText() + ', ') : ''
+			     + country != null ? (country.getText()) : '';
 			}" />
 		<attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation/OtherNamesUsed/OtherNames/OtherName/LegalName"
 			docProperty="pinfo:otherNames" xmlPath="#{
-			return currentElement.selectSingleNode('First').getText() + ' '
-			     + currentElement.selectSingleNode('Middle').getText() + ' '
-			     + currentElement.selectSingleNode('Last').getText();
+			     org.dom4j.Node first = currentElement.selectSingleNode('First');
+			     org.dom4j.Node mid = currentElement.selectSingleNode('Middle');
+			     org.dom4j.Node last = currentElement.selectSingleNode('Last');
+			return first != null ? (first.getText() + ' ') : ''
+			     + mid != null ? (mid.getText() + ' ') : ''
+			     + last != null ? (last.getText() + ' ') : '';
 			}" />
 		<!-- SF86 Attachments -->
 		<attributeConfig tagName="//XMP/Request/Attachments/Attachment"
