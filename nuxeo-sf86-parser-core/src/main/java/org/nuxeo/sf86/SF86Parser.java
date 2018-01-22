@@ -90,8 +90,14 @@ public class SF86Parser {
         log.info("XML importer service: " + importer);
         try {
             List<DocumentModel> models = importer.importDocuments(root, xml);
-            if (log.isDebugEnabled()) {
-                for (DocumentModel mdl : models) {
+            for (DocumentModel mdl : models) {
+                // Update application pointer
+                if ("Application" == mdl.getType()) {
+                    DocumentModel casedoc = session.getDocument(mdl.getParentRef());
+                    casedoc.setPropertyValue("case:application", mdl.getRepositoryName() + ":" + mdl.getId());
+                    session.saveDocument(casedoc);
+                }
+                if (log.isDebugEnabled()) {
                     log.debug("Imported: " + mdl);
                 }
             }

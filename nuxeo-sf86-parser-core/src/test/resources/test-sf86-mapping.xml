@@ -7,13 +7,13 @@
 		target="org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent"
 		point="documentMapping">
 		<!-- Create Application based on SF86 contents -->
-		<docConfig tagName="//XMP/Request/Applicant">
+		<docConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation">
 			<docType>Application</docType>
-			<!--<name> <![CDATA[ #{}]]></name> perhaps use sequence here -->
+			<name>Application</name>
 			<parent><![CDATA[ #{
 			org.dom4j.Node node = xml.selectSingleNode('//XMP/Request/Applicant/SSN');
 			org.nuxeo.ecm.core.api.DocumentModelList dml = session
-                .query(String.format("select * from Document where ecm:primaryType = 'Case' and case:SSN = '%s'", node.getText()));
+                .query(String.format("select * from Document where ecm:primaryType = 'Case' and case:SSN = '%s'", node.getText()));       
             return dml.get(0).getPathAsString();
     }]]></parent>
 			<!--<postCreationAutomationChain>Post_SF86Import</postCreationAutomationChain> -->
@@ -33,8 +33,27 @@
 		<docConfig
 			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference">
 			<docType>Interview</docType>
-			<!-- Will use default naming convention -->
+			<!-- Externally assigned naming -->
 			<parent><![CDATA[ #{
+			org.dom4j.Node node = xml.selectSingleNode('//XMP/Request/Applicant/SSN');
+			org.nuxeo.ecm.core.api.DocumentModelList dml = session
+                .query(String.format("select * from Document where ecm:primaryType = 'Case' and case:SSN = '%s'", node.getText()));
+            return dml.get(0).getPathAsString();
+    }]]></parent>
+		</docConfig>
+		<!-- Create address history -->
+		<!-- Will append to existing Applicant doc model -->
+		<docConfig updateExistingDocuments="true"
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency">
+			<docType>Application</docType>
+			<!-- Externally assigned naming -->
+			<!-- Return Application document for append -->
+			<name><![CDATA[ #{
+			org.dom4j.Node node = xml.selectSingleNode('//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation');
+			org.nuxeo.ecm.core.api.DocumentModel dm = map.get(node);
+			return dm.getName();
+    }]]></name>
+            <parent><![CDATA[ #{
 			org.dom4j.Node node = xml.selectSingleNode('//XMP/Request/Applicant/SSN');
 			org.nuxeo.ecm.core.api.DocumentModelList dml = session
                 .query(String.format("select * from Document where ecm:primaryType = 'Case' and case:SSN = '%s'", node.getText()));
@@ -43,9 +62,9 @@
 		</docConfig>
 		<!-- Create interview for current residency location -->
 		<docConfig
-			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']">
+			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']/Verifier">
 			<docType>Interview</docType>
-			<!-- Will use default naming convention -->
+			<!-- Externally assigned naming -->
 			<parent><![CDATA[ #{
 			org.dom4j.Node node = xml.selectSingleNode('//XMP/Request/Applicant/SSN');
 			org.nuxeo.ecm.core.api.DocumentModelList dml = session
@@ -58,21 +77,42 @@
 		target="org.nuxeo.ecm.platform.importer.xml.parser.XMLImporterComponent"
 		point="attributeMapping">
 		<!-- Application Document -->
-		<attributeConfig tagName="//XMP/Request/Applicant"
-			docProperty="uid:uid" xmlPath="@UserId" />
-		<attributeConfig tagName="//XMP/Request/Applicant/SSN"
-			docProperty="application:SSN" xmlPath="text()" />
-		<attributeConfig tagName="//XMP/Request/Applicant/Name"
-			docProperty="dc:title" xmlPath="#{return source.getName();}" />
-		<attributeConfig tagName="//XMP/Request/Applicant/Name"
+		<attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation"
 			docProperty="file:content">
 			<mapping documentProperty="filename">#{return source.getName();}</mapping>
 			<mapping documentProperty="content">#{return source.getName();}</mapping>
 		</attributeConfig>
-		<!-- <attributeConfig tagName="//XMP/Request/Applicant/DemographicData/FullName/LegalName/Last" 
-			docProperty="application:lastName" xmlPath="text()" /> <attributeConfig tagName="//XMP/Request/Applicant/DemographicData/FullName/LegalName/First" 
-			docProperty="application:firstName" xmlPath="text()" /> -->
-		<!-- Applicant Attachments -->
+		<attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation"
+			docProperty="uid:uid" xmlPath="#{ return xml.selectSingleNode('//XMP/Request/Applicant/@UserId').getText();}" />
+		<attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation/SSN"
+			docProperty="application:SSN" xmlPath="#{ return xml.selectSingleNode('//XMP/Request/Applicant/SSN').getText();}" />
+		<attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation/Birth"
+			docProperty="pinfo:citizenship" xmlPath="#{ return xml.selectSingleNode('/XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/Citizenship/Status').getText();}" />
+	    <attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation/SSN"
+			docProperty="pinfo:SSN" xmlPath="#{ return xml.selectSingleNode('//XMP/Request/Applicant/SSN').getText();}" />
+	    <attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation/Sex"
+			docProperty="pinfo:sex" xmlPath="text()" />
+		<attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation/Birth/Date"
+			docProperty="pinfo:dateOfBirth" xmlPath="#{
+			     String date = currentElement.selectSingleNode('Year').getText() + '-'
+			                 + currentElement.selectSingleNode('Month').getText() + '-'
+			                 + currentElement.selectSingleNode('Day').getText();
+			     return Fn.parseDate(date, 'yyyy-MM-dd');
+			}" />
+		<attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation/Birth/Place"
+			docProperty="pinfo:placeOfBirth" xmlPath="#{ 
+			return currentElement.selectSingleNode('City').getText() + ', '
+			     + currentElement.selectSingleNode('County').getText() + ', '
+			     + currentElement.selectSingleNode('State').getText() + ', '
+			     + currentElement.selectSingleNode('Country').getText();
+			}" />
+		<attributeConfig tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/IdentifyingInformation/OtherNamesUsed/OtherNames/OtherName/LegalName"
+			docProperty="pinfo:otherNames" xmlPath="#{
+			return currentElement.selectSingleNode('First').getText() + ' '
+			     + currentElement.selectSingleNode('Middle').getText() + ' '
+			     + currentElement.selectSingleNode('Last').getText();
+			}" />
+		<!-- SF86 Attachments -->
 		<attributeConfig tagName="//XMP/Request/Attachments/Attachment"
 			docProperty="dc:title" xmlPath="@OriginalLocalFileName" />
 		<attributeConfig tagName="//XMP/Request/Attachments/Attachment"
@@ -101,6 +141,16 @@
 		<attributeConfig
 			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/PersonalReferences/References/Reference/Email"
 			docProperty="interview:email" xmlPath="text()" />
+		<!-- Address History -->
+		<attributeConfig
+		    tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency/Address"
+		    docProperty="pinfo:address">
+		    <mapping documentProperty="city">City/text()</mapping>
+		    <mapping documentProperty="state">State/text()</mapping>
+		    <mapping documentProperty="street">Street/text()</mapping>
+		    <mapping documentProperty="zip">ZipCode/text()</mapping>
+		    <mapping documentProperty="current">#{ return currentElement.selectSingleNode("../DateRange/To/Date[@Type='Present']") != null; }</mapping>
+		</attributeConfig>
 		<!-- Applicant Interview (current location) -->
 		<attributeConfig
 			tagName="//XMP/SubmittedRequestInfo/RequestInfo/Request/Responses/Pooled/ResidenceHistory/Residencies/Residency[DateRange/To/Date/@Type='Present']/Verifier/LegalName/Last"
