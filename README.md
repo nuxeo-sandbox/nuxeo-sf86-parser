@@ -1,5 +1,10 @@
 # About
 
+"SF86" refers to "Standard Form 86", which is a questionnaire used for application to National Security Positions. See [https://en.wikipedia.org/wiki/Standard_Form_86](https://en.wikipedia.org/wiki/Standard_Form_86)
+
+This form is mapped to an XML format as well. This plug-in leverages Nuxeo's XML Importer Service (from the [importer framework](https://doc.nuxeo.com/nxdoc/choosing-how-to-import-data-in-the-nuxeo-platform/#nuxeo-platform-importer)) to ingest and extract data from SF86 XML files using standard Nuxeo [Binary Metadata](https://doc.nuxeo.com/nxdoc/binary-metadata/) mapping.
+
+Note that there is currently a dependency on a specific Studio project for this plug-in.
 
 # Requirements
 
