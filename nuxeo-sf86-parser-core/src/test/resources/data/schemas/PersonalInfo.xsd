@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:nxs="http://www.nuxeo.org/ecm/project/schemas/unisys-nbis/PersonalInfo" xmlns:nxsv="http://www.nuxeo.org/ecm/schemas/core/validation/" xmlns:ref="http://www.nuxeo.org/ecm/schemas/core/external-references/" targetNamespace="http://www.nuxeo.org/ecm/project/schemas/unisys-nbis/PersonalInfo">  
+  <!-- helper XSD definitions for list types -->  
+  <xs:complexType name="content"> 
+    <xs:sequence> 
+      <xs:element name="encoding" type="xs:string"/>  
+      <xs:element name="mime-type" type="xs:string"/>  
+      <xs:element name="data" type="xs:base64Binary"/>  
+      <xs:element name="name" type="xs:string"/>  
+      <xs:element name="length" type="xs:long"/>  
+      <xs:element name="digest" type="xs:string"/> 
+    </xs:sequence> 
+  </xs:complexType>  
+  <xs:simpleType name="stringList"> 
+    <xs:list itemType="xs:string"/> 
+  </xs:simpleType>  
+  <xs:simpleType name="doubleList"> 
+    <xs:list itemType="xs:double"/> 
+  </xs:simpleType>  
+  <xs:simpleType name="dateList"> 
+    <xs:list itemType="xs:date"/> 
+  </xs:simpleType>  
+  <xs:simpleType name="integerList"> 
+    <xs:list itemType="xs:integer"/> 
+  </xs:simpleType>  
+  <xs:simpleType name="booleanList"> 
+    <xs:list itemType="xs:boolean"/> 
+  </xs:simpleType>  
+  <xs:complexType name="blobList"> 
+    <xs:sequence> 
+      <xs:element name="item" type="nxs:content" minOccurs="0" maxOccurs="unbounded"/> 
+    </xs:sequence> 
+  </xs:complexType>  
+  <xs:element name="SSN" type="xs:string"/>
+  <xs:element name="address" type="nxs:pinfo_addressListType"/>
+  <xs:complexType name="pinfo_addressListType">
+    <xs:sequence>
+      <xs:element name="item" type="nxs:pinfo_addressType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="pinfo_addressType">
+    <xs:sequence>
+      <xs:element name="city" type="xs:string"/>
+      <xs:element name="state" type="xs:string"/>
+      <xs:element name="street" type="xs:string"/>
+      <xs:element name="zip" type="xs:string"/>
+      <xs:element name="current" type="xs:boolean" default="false"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="citizenship" type="xs:string"/>
+  <xs:element name="dateOfBirth" type="xs:date"/>
+  <xs:element name="financeFlags" type="nxs:pinfo_financeFlagsListType"/>
+  <xs:complexType name="pinfo_financeFlagsListType">
+    <xs:sequence>
+      <xs:element name="item" type="nxs:pinfo_financeFlagsType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="pinfo_financeFlagsType">
+    <xs:sequence>
+      <xs:element name="flagDescription" type="xs:string"/>
+      <xs:element name="flagId" type="xs:string"/>
+      <xs:element name="amplifyingInfo" type="xs:string"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:element name="otherNames" type="nxs:stringList"/>
+  <xs:element name="placeOfBirth" type="xs:string"/>
+  <xs:element name="sex" type="xs:string"/>
+</xs:schema>

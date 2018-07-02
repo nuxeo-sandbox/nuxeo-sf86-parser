@@ -11,20 +11,7 @@
 	<artifactId>nuxeo-sf86-parser-core</artifactId>
 	<name>Nuxeo sf86 parser core</name>
 	<description>Nuxeo SF86 Parser Core</description>
-	<dependencyManagement>
-		<dependencies>
-			<dependency>
-				<groupId>nuxeo-studio</groupId>
-				<artifactId>unisys-nbis</artifactId>
-				<version>0.0.0-SNAPSHOT</version>
-			</dependency>
-		</dependencies>
-	</dependencyManagement>
 	<dependencies>
-		<dependency>
-			<groupId>nuxeo-studio</groupId>
-			<artifactId>unisys-nbis</artifactId>
-		</dependency>
 		<dependency>
 			<groupId>org.nuxeo.ecm.automation</groupId>
 			<artifactId>nuxeo-automation-core</artifactId>

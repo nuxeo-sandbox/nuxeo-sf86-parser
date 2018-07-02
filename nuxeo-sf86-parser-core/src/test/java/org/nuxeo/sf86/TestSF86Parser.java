@@ -46,8 +46,6 @@ import org.nuxeo.runtime.test.runner.Deploy;
 import org.nuxeo.runtime.test.runner.Features;
 import org.nuxeo.runtime.test.runner.FeaturesRunner;
 import org.nuxeo.runtime.test.runner.LocalDeploy;
-import org.nuxeo.runtime.test.runner.PartialDeploy;
-import org.nuxeo.runtime.test.runner.TargetExtensions;
 
 /**
  * Verifying Service mapping with multiple file attachments
@@ -59,8 +57,7 @@ import org.nuxeo.runtime.test.runner.TargetExtensions;
 @Features(CoreFeature.class)
 @RepositoryConfig(cleanup = Granularity.METHOD)
 @Deploy("nuxeo-importer-xml-parser")
-@PartialDeploy(bundle = "studio.extensions.unisys-nbis", extensions = { TargetExtensions.ContentModel.class })
-@LocalDeploy({ "nuxeo-sf86-parser-core:test-sf86-mapping.xml" })
+@LocalDeploy({ "nuxeo-sf86-parser-core:test-sf86-mapping.xml", "nuxeo-sf86-parser-core:test-doctypes.xml" })
 public class TestSF86Parser {
 
     @Inject
